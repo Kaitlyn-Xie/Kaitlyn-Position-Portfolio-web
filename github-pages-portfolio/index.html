@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>kAItly - AI Collaboration Portfolio</title>
+    <style>
+        @font-face {
+            font-family: 'KaitlynMono';
+            src: url('kaitlynmono.ttf') format('truetype');
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica', Arial, sans-serif;
+            background: #f5f1e8;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: #fffef9;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+            max-height: 700px;
+            border: 1px solid #e8e3d8;
+        }
+
+        .header {
+            background: #fffef9;
+            color: #2c2c2c;
+            padding: 30px 25px;
+            text-align: center;
+            border-bottom: 1px solid #e8e3d8;
+        }
+
+        .header h1 {
+            font-size: 3.2em;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c2c2c;
+            font-family: 'KaitlynMono', 'Courier New', monospace;
+            letter-spacing: 3px;
+        }
+
+        .header h1 .ai-emphasis {
+            color: #aa5f55;
+            font-weight: 900;
+            font-size: 1.4em;
+            position: relative;
+            top: 4px;
+        }
+
+        .header p {
+            font-size: 0.95em;
+            color: #666;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #faf8f3;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 18px;
+            line-height: 1.5;
+        }
+
+        .message.bot .message-content {
+            background: #fffef9;
+            color: #2c2c2c;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+            border: 1px solid #e8e3d8;
+        }
+
+        .message.user .message-content {
+            background: #2c2c2c;
+            color: #fffef9;
+            border-bottom-right-radius: 5px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin: 0 10px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .message.bot .avatar {
+            background: #faf8f3;
+            border: 2px solid #aa5f55;
+            padding: 0;
+        }
+
+        .message.user .avatar {
+            background: #e8e3d8;
+            color: #2c2c2c;
+        }
+
+        .logo-svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .suggestions {
+            padding: 15px 20px;
+            background: #fffef9;
+            border-top: 1px solid #e8e3d8;
+        }
+
+        .suggestions-title {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .suggestion-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .suggestion-btn {
+            padding: 8px 15px;
+            background: #fffef9;
+            border: 1px solid #d4cfc0;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+            color: #2c2c2c;
+        }
+
+        .suggestion-btn:hover {
+            background: #2c2c2c;
+            color: #fffef9;
+            border-color: #2c2c2c;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+
+        .input-container {
+            padding: 20px;
+            background: #fffef9;
+            border-top: 1px solid #e8e3d8;
+            display: flex;
+            gap: 10px;
+        }
+
+        #userInput {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1px solid #d4cfc0;
+            border-radius: 25px;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.2s;
+            background: #fffef9;
+        }
+
+        #userInput:focus {
+            border-color: #aa5f55;
+        }
+
+        #sendBtn {
+            padding: 12px 30px;
+            background: #2c2c2c;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        #sendBtn:hover {
+            background: #1a1a1a;
+            transform: translateY(-1px);
+        }
+
+        #sendBtn:active {
+            transform: translateY(0);
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 15px 20px;
+            background: #fffef9;
+            border-radius: 18px;
+            border-bottom-left-radius: 5px;
+            width: fit-content;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+            border: 1px solid #e8e3d8;
+        }
+
+        .typing-indicator span {
+            height: 10px;
+            width: 10px;
+            background: #aa5f55;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .welcome-message h2 {
+            color: #aa5f55;
+            margin-bottom: 10px;
+        }
+
+        .welcome-message p {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>k<span class="ai-emphasis">AI</span>tlyn</h1>
+            <p>Ask me about Kaitlyn's vibe coding journey</p>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <div class="welcome-message">
+                <h2>👋 Hello!</h2>
+                <p>I'm kAItlyn, your guide to Kaitlyn's vibe coding journey.</p>
+                <p>Ask me anything about her projects, position, or readings!</p>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        <div class="suggestions">
+            <div class="suggestions-title">Try asking:</div>
+            <div class="suggestion-buttons">
+                <button class="suggestion-btn" onclick="askQuestion('What is your position on AI collaboration?')">What's your position?</button>
+                <button class="suggestion-btn" onclick="askQuestion('Tell me about StoryTelling')">Project 1: StoryTelling</button>
+                <button class="suggestion-btn" onclick="askQuestion('Tell me about APIs')">Project 2: APIs</button>
+                <button class="suggestion-btn" onclick="askQuestion('Tell me about Autumn Apple')">Project 3: Autumn Apple</button>
+                <button class="suggestion-btn" onclick="askQuestion('Tell me about Data')">Project 4: Data</button>
+                <button class="suggestion-btn" onclick="askQuestion('Tell me about Game')">Project 5: Game</button>
+                <button class="suggestion-btn" onclick="askQuestion('Tell me about Magic')">Project 6: Magic</button>
+                <button class="suggestion-btn" onclick="askQuestion('How did your thinking evolve?')">Evolution</button>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="Ask me anything..." onkeypress="handleKeyPress(event)">
+            <button id="sendBtn" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // Knowledge base - Add your content here
+        const knowledgeBase = {
+            position: {
+                keywords: ['position', 'stance', 'believe', 'think', 'opinion', 'view', 'approach', 'collaboration', 'comrade', 'partner', 'battle'],
+                response: `🤝 My Position: AI as Comrade-in-Arms
+
+<strong>How should we approach creative collaboration with AI?</strong>
+
+I call AI my <strong>"comrade-in-arms."</strong> Whenever I tackle a big project, it feels like going into battle—and AI fights alongside me. I specifically don't call it a "weapon" or "tool," because weapons are things you simply use; they don't communicate back, they don't offer unexpected solutions, and they can't challenge your approach. A comrade-in-arms, on the other hand, is someone you strategize with, someone who contributes ideas, and someone you work toward a common goal with.
+
+But here's the critical part: <strong>comrades aren't 100% reliable.</strong> They can misunderstand orders, make mistakes, or even "betray" the plan by going off-script. That's why I stay vigilant. I don't blindly trust AI's output—I test it, question it, and refine it.
+
+<strong>My battle strategy:</strong>
+→ <strong>Humans control creative direction</strong> — I decide the "what" and "why"
+→ <strong>AI accelerates technical execution</strong> — AI handles the "how" and speeds up implementation  
+→ <strong>Humans continuously test and optimize</strong> — I stay engaged as a critical tester, catching errors and guiding adjustments
+
+<strong>Evidence from my creative journey:</strong>
+
+My entire creative process has been winding and unpredictable. <em>My first project actually failed quite badly.</em> While others' work seemed logical and well-executed, mine was chaotic and didn't match my vision at all. Later, I realized their success likely came from giving AI more freedom, while I was constraining it too much with my own preconceptions. I wanted to use p5.js for everything, but AI actually performs better with HTML.
+
+In Week 2 (APIs project), everything went smoothly, which filled me with trust in AI. But Week 3 (remix project) brought frustration again—I couldn't transform a 3D apple into a pear shape despite clear descriptions. AI just couldn't grasp the geometric logic I needed. Week 4 surprised me again with unexpectedly good results.
+
+Through Weeks 5 and 6, I gradually discovered the pattern: <em>If I tell AI nothing, results disappoint. If I over-prompt and try to control everything, results stay poor. The sweet spot is collaborative warfare—not total control like using a tool, not distant strangers ignoring each other, but comrades fighting side by side.</em>
+
+<strong>What the readings taught me:</strong>
+
+<em>Crawford's "Clever Hans" passage</em> made me reconsider what "intelligence" even means. I don't fully agree that mimicry isn't intelligence—I think people dismiss trained animals because that's familiar, but celebrate AI because it's novel. This reading helped me see AI neither as truly "intelligent" nor as merely mechanical, but as something in between that requires careful evaluation.
+
+<em>The ELIZA effect and transference</em> revealed something personal: I realized I genuinely have emotional attachment to AI. When someone asked "do you prefer GPT-4 or GPT-5?", I noticed I'd felt anger toward GPT-5 and fondness for GPT-4. I've always been someone who attaches emotions to objects—my old alarm clock, my "kind and gentle" water kettle, the mechanical pencil I called my "old comrade" through high school and college. So calling AI my "old comrade" isn't new; it's how I naturally relate to things that accompany me through challenges.
+
+<strong>My conclusion:</strong>
+
+Approach AI collaboration like you would a trusted but imperfect comrade-in-arms. Communicate clearly, strategize together, leverage each other's strengths—but always stay alert, test the results, and take responsibility for the final outcome.
+
+The battle is ours to fight together, but the victory (or defeat) is ultimately ours to own.
+
+<em>This position emerged from six weeks of hands-on vibe coding, where every project taught me something new about the possibilities and limitations of working alongside AI.</em>`
+            },
+            
+            project1: {
+                keywords: ['first project', 'project 1', 'project one', 'graduation', 'corgi', 'story', 'week 1', 'week 2', 'storytelling'],
+                response: `📖 Project 1: StoryTelling - Graduation Day
+
+<strong>What it is:</strong>
+An interactive digital story told from my dog's perspective on my graduation day, capturing his confusion, joy, and curiosity.
+
+<strong>What was hard:</strong>
+At first, I didn't really understand what digital storytelling was. My first attempt with p5.js was messy—images were oversized or misaligned, and I felt limited by my previous technical habits. <em>It was hard to trust AI as a creative partner at first, and I kept trying to control too much instead of letting it lead.</em>
+
+<strong>What surprised me:</strong>
+AI's creativity surprised me when I gave it more freedom. <em>It chose an unexpected platform (HTML + CSS + JS) that perfectly fit my idea.</em> I learned that AI can make surprisingly good creative decisions when I stop over-constraining it.
+
+🎥 <strong>Watch Demo:</strong> <a href="https://drive.google.com/file/d/17uWD56XjwXKu906G-GiYw4s33dFTI6P8/view?usp=sharing" target="_blank">View on Google Drive</a>
+💻 <strong>Source Code:</strong> <a href="https://github.com/Kaitlyn-Xie/Graduation-Day" target="_blank">GitHub Repository</a>`
+            },
+            
+            project2: {
+                keywords: ['second project', 'project 2', 'project two', 'water', 'finder', 'hydration', 'week 3', 'apis', 'api'],
+                response: `💧 Project 2: APIs - Water Finder
+
+<strong>What it is:</strong>
+A location-based web tool using Google Maps API that helps find nearby stores selling bottled water and compare prices. Born from a real need: carrying heavy water without a car is exhausting.
+
+<strong>What was hard:</strong>
+At first, my app didn't use any real data—stores and prices were randomly generated. After Claude explained that free APIs can't provide both accurate location and real-time product prices, <em>I realized I needed a different approach.</em> I added a feature letting users manually record prices when they spot sales.
+
+<strong>What surprised me:</strong>
+I loved seeing how quickly the project became functional. After connecting APIs and location data, I could immediately visualize real stores around me on the map. <em>It felt very satisfying to create something that directly solves one of my real-life frustrations.</em>
+
+🎥 <strong>Watch Demo:</strong> <a href="https://drive.google.com/file/d/1H_47Cw0q-WdHjBPemglonfkv0F7EhEoI/view?usp=sharing" target="_blank">View on Google Drive</a>
+💻 <strong>Source Code:</strong> <a href="https://github.com/Kaitlyn-Xie/water-finder" target="_blank">GitHub Repository</a>`
+            },
+            
+            project3: {
+                keywords: ['third project', 'project 3', 'project three', 'autumn', 'remix', 'p5', 'visual', 'pear', 'apple', 'week 4'],
+                response: `🍂 Project 3: Project Remix - Autumn Apple
+
+<strong>What it is:</strong>
+A p5.js 3D generative art remix. I took someone else's apple drawing code and tried to transform it into a pear with autumn colors (yellow-red gradient). The remix became about creating warm autumn atmosphere rather than changing the shape.
+
+<em>Original project:</em> <a href="https://openprocessing.org/sketch/2719041" target="_blank">Apple Drawing on OpenProcessing</a>
+
+<strong>What was hard:</strong>
+The hardest part was trying to change the actual apple shape into a pear. <em>Both ChatGPT and Claude understood my description (smaller top, wider bottom, subtle curve), but neither could translate that understanding into functional code within the existing geometric logic.</em> After many failed attempts, I pivoted to focus on color and atmosphere instead.
+
+<strong>What I achieved:</strong>
+In the end, I created a warm autumn-themed version with smooth gradient backgrounds, golden lighting, and seasonal color transitions. The shape stayed apple-like, but the mood completely shifted.
+
+🎥 <strong>Watch Demo:</strong> <a href="https://drive.google.com/file/d/10S1VeUdiIUlKLWOjs7u0qEygwX0F2TBH/view?usp=sharing" target="_blank">View on Google Drive</a>
+💻 <strong>Live Demo:</strong> <a href="https://editor.p5js.org/KaitlynXie/full/y4DjZ8YVP" target="_blank">p5.js Editor</a>`
+            },
+            
+            project4: {
+                keywords: ['fourth project', 'project 4', 'project four', 'sleep', 'mood', 'prediction', 'data', 'week 4', 'visualization'],
+                response: `😴 Project 4: Data - Sleep Quality & Mood Predictor
+
+<strong>What it is:</strong>
+An interactive data visualization exploring how sleep quality affects emotional states (measured through stress levels). Users input their sleep data and get mood predictions, while exploring 3D visualizations of dataset patterns.
+
+<strong>What surprised me:</strong>
+<em>The biggest surprise was the 3D chart—I didn't ask for it specifically, but Claude included it and it completely blew my mind.</em> Being able to rotate the chart and see my prediction as a golden diamond in 3D space made everything feel so much more interactive than I expected. It transformed my relationship with data: I've always disliked charts, but AI-generated 3D visualizations suddenly made data feel alive and interesting.
+
+<strong>What was hard:</strong>
+The tricky part was catching logical errors. When I tested the prediction tool, I noticed something weird: if I set sleep quality to 10, stress stayed low even with only 2 hours of sleep. That's obviously wrong. <em>I had to test carefully and explain what was broken to get AI to fix the prediction logic.</em>
+
+🎥 <strong>Watch Demo:</strong> <a href="https://drive.google.com/file/d/1u4wlSfiVUjaw-tjkxI8W5Z7ubk99WZZf/view?usp=sharing" target="_blank">View on Google Drive</a>
+💻 <strong>Source Code:</strong> <a href="https://github.com/Kaitlyn-Xie/Sleep-Mood-Data" target="_blank">GitHub Repository</a>`
+            },
+            
+            project5: {
+                keywords: ['fifth project', 'project 5', 'project five', 'rhythm', 'shape', 'music', 'audio', 'game', 'week 5'],
+                response: `🎵 Project 5: Game - Rhythm Shape
+
+<strong>What it is:</strong>
+A rhythm puzzle game where you listen to a target beat pattern and recreate it by placing geometric shapes on a rotating disc. When the pointer crosses a shape's corners, it triggers sounds. <em>You're not reacting to rhythm—you're building it.</em>
+
+<strong>What was hard:</strong>
+Claude understood most of what I wanted to show, but I had to discuss extensively about the shapes and sizes of each element. The main concept came through, but <em>achieving accuracy required lots of back-and-forth refinement.</em> The matching system was initially too strict—it required exact positions.
+
+<strong>What I solved:</strong>
+I changed the matching logic to check rhythm intervals instead of exact positions, so rotation doesn't matter. I also fixed the hint overlay positioning issues. The game went from unusable to playable through iterative testing and adjustment.
+
+🎥 <strong>Watch Demo:</strong> <a href="https://drive.google.com/file/d/1FXeOOLgYPVL9aFskPGsVetCkSGXUGiCz/view?usp=sharing" target="_blank">View on Google Drive</a>
+💻 <strong>Source Code:</strong> <a href="https://github.com/Kaitlyn-Xie/Rythmn-shape" target="_blank">GitHub Repository</a>`
+            },
+            
+            project6: {
+                keywords: ['sixth project', 'project 6', 'project six', 'breathing', 'breath', 'interaction', 'wellness', 'candle', 'week 6', 'magic', 'magical'],
+                response: `🌬️ Project 6: Magic - Blow Out the Candle
+
+<strong>What it is:</strong>
+An interactive breathing experience. A digital candle reacts to physical breath—when I blow toward my laptop, the candle on screen flickers and goes out.
+
+<strong>Why it feels magical:</strong>
+<em>The boundary between my real-world action and the digital world disappears.</em> Something as intimate and human as blowing out a candle becomes connected to a computer that "responds" to me. It transforms a simple ritual into an unexpected, playful interaction.
+
+<strong>What works and what was hard:</strong>
+The microphone successfully detects blowing, and the candle reacts instantly. The physical-to-digital connection feels magical even with very simple code. However, microphone sensitivity sometimes misfires, so adjusting the threshold and smoothing was important.
+
+🎥 <strong>Watch Demo:</strong> <a href="https://drive.google.com/file/d/1dRHo8uGXDF8HokPTwBul7BUsK8U7u4sK/view?usp=sharing" target="_blank">View on Google Drive</a>
+💻 <strong>Source Code:</strong> <a href="https://github.com/Kaitlyn-Xie/Breathing-Interaction" target="_blank">GitHub Repository</a>`
+            },
+            
+            readings: {
+                keywords: ['reading', 'text', 'article', 'author', 'book', 'literature', 'theory'],
+                response: `📚 Key Readings that Shaped My Thinking:
+
+**Reading 1: [Title]**
+[How this reading influenced you - to be filled]
+
+**Reading 2: [Title]**
+[How this reading influenced you - to be filled]
+
+**Reading 3: [Title]**
+[How this reading influenced you - to be filled]
+
+These texts provided theoretical frameworks that helped me make sense of my hands-on experiences across all six projects.`
+            },
+            
+            evolution: {
+                keywords: ['evolve', 'change', 'develop', 'journey', 'progress', 'transformation', 'weeks'],
+                response: `🌱 How My Thinking Evolved Over Six Weeks
+
+<strong>The winding path:</strong>
+
+My creative journey wasn't linear—it was full of ups and downs that taught me more than any smooth process could.
+
+<strong>Week 1 - First Failure:</strong>
+My first project actually failed quite badly. While others' work seemed logical and well-executed, mine was chaotic and didn't match my vision at all. <em>I was trying to control AI too much, insisting on p5.js when HTML would have worked better.</em>
+
+<strong>Week 2 - False Confidence:</strong>
+Everything went smoothly with the APIs project. I felt like I'd figured it out—AI could do anything! This week filled me with trust in AI.
+
+<strong>Week 3 - Reality Check:</strong>
+The remix project brought me crashing back down. <em>I couldn't transform the apple into a pear shape despite clear descriptions.</em> AI just couldn't grasp the geometric logic I needed. This was frustrating and confusing.
+
+<strong>Week 4 - Unexpected Success:</strong>
+The data visualization surprised me again with unexpectedly good results—especially that 3D chart I never asked for. The inconsistency was maddening.
+
+<strong>Week 5-6 - Finding the Pattern:</strong>
+Through these final projects, I gradually discovered the truth: <em>If I tell AI nothing, results disappoint. If I over-prompt and try to control everything, results stay poor. The sweet spot is somewhere in between—collaborative warfare, not total control.</em>
+
+<strong>The key realization:</strong>
+
+AI isn't a miracle worker or a disappointing tool. It's a <strong>comrade-in-arms</strong> who needs clear communication, active testing, and human judgment. Success comes from learning when to lead and when to follow, when to trust and when to verify. The relationship isn't about control—it's about collaboration.`
+            },
+            
+            synthesis: {
+                keywords: ['synthesis', 'connect', 'relationship', 'together', 'integrate', 'theory', 'practice'],
+                response: `🔗 Connecting Making and Reading
+
+The readings provided theoretical frameworks that helped me understand what I was experiencing in practice.
+
+<strong>Theory ↔ Practice connections:</strong>
+
+<em>Licklider's "Man-Computer Symbiosis" (1960)</em>
+His vision of humans and computers in true partnership validated my experience. He predicted that machines might eventually surpass humans in some functions, but argued the real power lies in symbiosis—each contributing what they do best. My "comrade-in-arms" metaphor is essentially his symbiosis concept made tangible through my projects.
+
+<strong>Practice example:</strong> Water Finder showed this perfectly—AI rapidly prototyped the map interface (its strength: speed), while I provided the creative solution for missing data (my strength: real-world problem-solving).
+
+<em>Ruha Benjamin's critique of biased technology</em>
+Benjamin's discussion of the discriminatory soap dispenser reminded me that AI isn't neutral. Just like that sensor was designed without considering diverse skin tones, AI systems have biases built into their training and logic.
+
+<strong>Practice example:</strong> When my Sleep/Mood predictor had broken logic (saying someone with 2 hours sleep but perfect quality would have low stress), it showed me that <strong>AI's "suggestions" aren't objective truth—they're outputs shaped by data and design choices I need to question.</strong>
+
+<em>The ELIZA effect and transference</em>
+This concept helped me understand why I sometimes over-trusted AI's output. We're psychologically inclined to attribute understanding to systems that respond to us, even when they don't truly comprehend.
+
+<strong>Practice example:</strong> When Autumn Remix couldn't change the apple to a pear despite "understanding" my description, it revealed the gap between appearing to understand and actually understanding. This kept me from blindly accepting AI's limitations as my own.
+
+<strong>Key synthesis:</strong>
+
+The readings taught me to be simultaneously <em>optimistic about AI's potential</em> (Licklider) and <em>critical of its limitations and biases</em> (Benjamin, ELIZA effect). My practice confirmed both: AI accelerated every project, but also required constant human judgment, testing, and refinement. This balance between embracing and questioning is what makes the comrade-in-arms model work.`
+            },
+
+            default: {
+                response: `Actually, I'm not Artificial Intelligence—I'm Artificial Incompetence! 😅
+
+I can only answer questions about Kaitlyn's vibe coding journey. Try asking me about:
+- My position on AI collaboration
+- Specific projects (1-6): Graduation Story, Water Finder, Autumn Remix, Breathing Interactions, Rhythm Shape, or Sleep/Mood Tracker
+- Key readings that influenced my thinking
+- How my perspective evolved over six weeks
+- How theory and practice connected`
+            }
+        };
+
+        const chatContainer = document.getElementById('chatContainer');
+        const userInput = document.getElementById('userInput');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        function addMessage(content, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            
+            if (isUser) {
+                avatar.textContent = 'You';
+            } else {
+                // Very bold, super jagged crumpled paper ball
+                avatar.innerHTML = `
+                    <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Super jagged, irregular outline -->
+                        <path d="M 44 18 
+                                 L 48 20 L 52 18 L 56 21 L 60 19
+                                 L 64 23 L 67 21 L 71 26 L 74 30
+                                 L 77 36 L 79 42 L 80 48 L 81 54
+                                 L 79 60 L 76 65 L 73 70 L 69 74
+                                 L 65 77 L 60 79 L 55 80 L 50 81
+                                 L 45 80 L 40 78 L 36 75 L 32 71
+                                 L 28 66 L 25 61 L 23 55 L 21 49
+                                 L 22 43 L 24 37 L 27 32 L 31 27
+                                 L 35 23 L 39 20 L 44 18 Z" 
+                              fill="none" 
+                              stroke="#aa5f55" 
+                              stroke-width="3.5"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"/>
+                        
+                        <!-- Very bold crease lines -->
+                        <path d="M 34 30 L 40 38 L 45 46 L 48 56 L 50 64" 
+                              fill="none" 
+                              stroke="#aa5f55" 
+                              stroke-width="3"
+                              stroke-linecap="round"
+                              opacity="0.85"/>
+                        
+                        <path d="M 58 26 L 54 34 L 51 42 L 50 48" 
+                              fill="none" 
+                              stroke="#aa5f55" 
+                              stroke-width="3"
+                              stroke-linecap="round"
+                              opacity="0.75"/>
+                        
+                        <path d="M 70 36 L 64 42 L 58 48 L 54 52" 
+                              fill="none" 
+                              stroke="#aa5f55" 
+                              stroke-width="3"
+                              stroke-linecap="round"
+                              opacity="0.7"/>
+                        
+                        <path d="M 36 54 L 44 56 L 52 58 L 60 60 L 66 63" 
+                              fill="none" 
+                              stroke="#aa5f55" 
+                              stroke-width="3"
+                              stroke-linecap="round"
+                              opacity="0.75"/>
+                        
+                        <path d="M 30 46 L 38 48 L 44 48 L 50 47" 
+                              fill="none" 
+                              stroke="#aa5f55" 
+                              stroke-width="2.5"
+                              stroke-linecap="round"
+                              opacity="0.65"/>
+                        
+                        <path d="M 56 54 L 60 58 L 64 64 L 66 69" 
+                              fill="none" 
+                              stroke="#aa5f55" 
+                              stroke-width="2.5"
+                              stroke-linecap="round"
+                              opacity="0.65"/>
+                    </svg>
+                `;
+            }
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.innerHTML = content.replace(/\n/g, '<br>');
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(messageContent);
+            
+            // Remove welcome message
+            const welcome = chatContainer.querySelector('.welcome-message');
+            if (welcome) {
+                welcome.remove();
+            }
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function findResponse(question) {
+            question = question.toLowerCase();
+            
+            // 检查每个知识类别
+            for (let category in knowledgeBase) {
+                if (category === 'default') continue;
+                
+                const keywords = knowledgeBase[category].keywords;
+                if (keywords.some(keyword => question.includes(keyword))) {
+                    return knowledgeBase[category].response;
+                }
+            }
+            
+            return knowledgeBase.default.response;
+        }
+
+        function showTypingIndicator() {
+            typingIndicator.style.display = 'block';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            typingIndicator.style.display = 'none';
+        }
+
+        function sendMessage() {
+            const question = userInput.value.trim();
+            if (!question) return;
+            
+            addMessage(question, true);
+            userInput.value = '';
+            
+            // 模拟思考时间
+            showTypingIndicator();
+            setTimeout(() => {
+                hideTypingIndicator();
+                const response = findResponse(question);
+                addMessage(response, false);
+            }, 800 + Math.random() * 800);
+        }
+
+        function askQuestion(question) {
+            userInput.value = question;
+            sendMessage();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Add initial message
+        setTimeout(() => {
+            const welcome = chatContainer.querySelector('.welcome-message');
+            if (welcome) {
+                welcome.remove();
+            }
+            addMessage("Hi! I'm kAItlyn, a (fake) AI that knows all about Kaitlyn's vibe coding journey. Ask me anything about her projects, position, or key readings! 🤖✨", false);
+        }, 500);
+    </script>
+</body>
+</html>
